@@ -1,0 +1,26 @@
+{% load bootstrap5 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+{# Display a form #}
+<div style="max-width: 20rem; padding: 10px">
+    <form method="post" class="form">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">
+                Submit
+            </button>
+            <a href="/">
+                <button type="button" class="btn btn-secondary">
+                    Back
+                </button>
+            </a>
+        {% endbuttons %}
+    </form>
+</div>
