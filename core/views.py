@@ -5,7 +5,7 @@ from django.views.generic import CreateView, ListView
 from rest_framework.viewsets import ModelViewSet
 
 from core.forms import RegisterForm
-from core.models import User, EURUSD_D1
+from core.models import User
 from core.serializers import UserSerializer
 
 

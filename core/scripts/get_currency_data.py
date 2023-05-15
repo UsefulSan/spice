@@ -210,7 +210,8 @@ class SharesDataLoader():
             print("\nВыведем датафрейм с данными")
             print(rates_frame)
 
-            for i in range(len(rates_frame.index) - 1):  # последний бар не берем -1 т.к. он еще формируется
+            for i in range(len(rates_frame.index)):  # последний бар не берем -1 т.к. он еще формируется.
+                # for i in range(len(rates_frame.index) - 1): !!! Возможно здесь надо будет -1
                 _time = rates_frame.at[i, "time"]
                 _open = rates_frame.at[i, "open"]
                 _high = rates_frame.at[i, "high"]
