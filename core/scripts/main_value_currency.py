@@ -1,4 +1,4 @@
-import mt5
+import MetaTrader5 as mt5
 
 
 class ValueCurrency:
@@ -30,4 +30,3 @@ class ValueCurrency:
 
 
 currency = ValueCurrency()
-

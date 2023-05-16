@@ -10,7 +10,7 @@ class CurrencyMixin(models.Model):
     class Meta:
         abstract = True
 
-    time = models.DateTimeField(verbose_name="Дата фрейма")
+    time = models.DateTimeField(verbose_name="Дата фрейма", primary_key=True)
     open = models.FloatField(verbose_name="Цена открытия")
     high = models.FloatField(verbose_name='Максимум торгового диапазона')
     low = models.FloatField(verbose_name='Минимум торгового диапазона')
