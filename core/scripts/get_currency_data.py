@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 
 import MetaTrader5 as mt5  # импортируем модуль для подключения к MetaTrader5
 import cv2
@@ -19,6 +19,8 @@ class SharesDataLoader():
         self.how_many_bars_max = 1000
 
         self.timezone = pytz.timezone("Etc/UTC")  # установим таймзону в UTC
+        self.local_timezone = pytz.timezone("Europe/Moscow")
+
         # создадим объект datetime в таймзоне UTC, чтобы не применялось смещение локальной таймзоны
         # self._utc_till = datetime.datetime.now(self.timezone)# datetime.datetime(2021, 10, 10, tzinfo=self.timezone)
 
@@ -114,35 +116,48 @@ class SharesDataLoader():
                 # print(last_bar_time)
 
                 # calc missed bars
-                today = datetime.datetime.now(tz=self.timezone)  # Проверить верность времени
+                today = datetime.now(tz=self.timezone)  # Проверить верность времени
                 # today_utc = datetime.datetime(today.year, today.month, today.day, today.hour, today.minute,
                 #                               today.second, tzinfo=self.timezone)
                 # print(today)
                 # print(last_bar_time)
                 how_many_bars = int(((today - last_bar_time).total_seconds()) // timeframe[1] + 1)
-                print(today, last_bar_time)
-                print((today - last_bar_time))
-                print((today - last_bar_time).total_seconds())
-                print(timeframe[1])
-                print(f'Quantity bars to load: {how_many_bars}')
+                # print(today, last_bar_time)
+                # print((today - last_bar_time))
+                # print((today - last_bar_time).total_seconds())
+                # print(timeframe[1])
+                print(f'Quantity bars to load: {how_many_bars}\n')
 
-            # получим данные по завтрашний день
-            utc_till = datetime.datetime.now() + datetime.timedelta(days=1)
+
+            # # получим данные по завтрашний день
+            utc_till = datetime.now(tz=self.timezone) + timedelta(days=1)
             # print(utc_till)
+            # a = datetime.datetime.now(tz=self.timezone) - datetime.timedelta(hours=3)
+            a = datetime.utcnow() - datetime.now()
+            # print(f'{a} ЗДЕСЬЬЬ')
             rates = mt5.copy_rates_from(ticket, timeframe[0], utc_till, how_many_bars)
-
+            # print(rates)
             # создадим из полученных данных DataFrame
             rates_frame = pd.DataFrame(rates)
+            # print(rates_frame)
+            # Подсчет отклонения временных зон в часах
+            if datetime.utcnow() < datetime.now():
+                time_zone_difference = int((datetime.now() - datetime.utcnow()).seconds / 3600)
+            else:
+                time_zone_difference = -int((datetime.utcnow() - datetime.now()).seconds / 3600)
             # сконвертируем время в виде секунд в формат datetime
-            if len(rates_frame.index):
+            if len(rates_frame):
                 rates_frame['time'] = pd.to_datetime(rates_frame['time'], unit='s', utc=True)  # Проверить время utc
+                rates_frame['time'] = rates_frame['time'] - timedelta(hours=time_zone_difference)
+            # print(type(rates_frame))
+            # print(rates_frame)
 
             # выведем данные
             # print("\nВыведем датафрейм с данными")
             # print(rates_frame)
 
-            for i in range(len(rates_frame.index)):  # последний бар не берем -1 т.к. он еще формируется.
-                # for i in range(len(rates_frame.index) - 1): !!! Возможно здесь надо будет -1
+            for i in range(len(rates_frame)):  # последний бар не берем -1 т.к. он еще формируется.
+                # for i in range(len(rates_frame.index) - 1): #  !!! Возможно здесь надо будет -1
                 _time = rates_frame.at[i, "time"]
                 _open = rates_frame.at[i, "open"]
                 _high = rates_frame.at[i, "high"]
@@ -166,10 +181,10 @@ class SharesDataLoader():
             last_bar_time = rates_frame.at[len(rates_frame.index) - 1, "time"]
             # print(last_bar_time)
 
-            next_bar_time = last_bar_time + datetime.timedelta(seconds=timeframe[1])
+            next_bar_time = last_bar_time + timedelta(seconds=timeframe[1])
             # print(next_bar_time)
 
-            if next_bar_time > datetime.datetime.now(tz=self.timezone):  # Проверить время utc
+            if next_bar_time > datetime.now(tz=self.timezone):  # Проверить время utc
                 break
 
         # ----------------------- Update in Real Time -----------------------
