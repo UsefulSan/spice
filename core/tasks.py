@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 from celery import shared_task
@@ -15,9 +15,8 @@ pd.set_option('display.width', 1500)  # макс. ширина таблицы д
 def checking_currency():
     how_many_bars = 1
 
-    utc_till = datetime.datetime.now() + datetime.timedelta(days=1)  # получим данные по завтрашний день
-    # utc_till = datetime.datetime.now() - datetime.timedelta(days=1)  # получим данные по вчерашний день
-    # print(utc_till)
+    utc_till = datetime.now() + timedelta(days=1)  # получим данные по завтрашний день
+    # utc_till = datetime.now() - timedelta(days=1)  # получим данные по вчерашний день
 
     for timeframe_name, timeframe in currency.timeframe.items():
         for ticket in currency.tickers:
