@@ -109,12 +109,9 @@ class SharesDataLoader():
                 how_many_bars = self.how_many_bars_max
             else:
                 last_bar_time = rows[0][0]
-                print(last_bar_time)
                 # calc missed bars
-                today = datetime.now(tz=self.local_timezone)
-                print(today)
-                print((today - last_bar_time).total_seconds())
-                how_many_bars = int(((today - last_bar_time).total_seconds()) // timeframe[1] + 3)
+                today = datetime.now(tz=self.timezone) + timedelta(hours=3)
+                how_many_bars = int(((today - last_bar_time).total_seconds()) // timeframe[1] + 1)
 
                 print(f'Quantity bars to load: {how_many_bars}\n')
 
@@ -132,8 +129,9 @@ class SharesDataLoader():
             # else:
             #     time_zone_difference = -int((datetime.utcnow() - datetime.now()).seconds / 3600)
             # сконвертируем время в виде секунд в формат datetime
+
             if not rates_frame.empty:
-                rates_frame['time'] = pd.to_datetime(rates_frame['time'], unit='s', utc=True)  # Проверить время utc
+                rates_frame['time'] = pd.to_datetime(rates_frame['time'], unit='s', utc=True)
                 # rates_frame['time'] = rates_frame['time'] - timedelta(hours=time_zone_difference)
 
             # выведем данные
@@ -142,7 +140,7 @@ class SharesDataLoader():
 
             # result.to_sql('temp_count_cards_ids', engine, if_exists='replace', index=False)
             for i in range(len(rates_frame)):  # последний бар не берем -1 т.к. он еще формируется.
-                # for i in range(len(rates_frame.index) - 1): #  !!! Возможно здесь надо будет -1
+                # for i in range(len(rates_frame) - 1): #  !!! Возможно здесь надо будет -1
                 _time = rates_frame.at[i, "time"]
                 _open = rates_frame.at[i, "open"]
                 _high = rates_frame.at[i, "high"]
@@ -151,6 +149,12 @@ class SharesDataLoader():
                 _tick_volume = rates_frame.at[i, "tick_volume"]
                 _real_volume = rates_frame.at[i, "real_volume"]
                 # print(i, _time, _open, _high, _low, _close, _tick_volume, _real_volume)
+
+                if ((rows[0][0] != None) and (_time == last_bar_time)) or ((rows[0][0] == None)):
+                    self.cursor.execute(
+                        "UPDATE " + table_name + " SET open=%s, high=%s, low=%s, close=%s, real_volume=%s, "
+                                                 "tick_volume=%s WHERE time=%s",
+                        (_open, _high, _low, _close, int(_real_volume), int(_tick_volume), _time,))
 
                 if ((rows[0][0] != None) and (_time > last_bar_time)) or ((rows[0][0] == None)):
                     # let's insert row in table
