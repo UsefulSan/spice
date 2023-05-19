@@ -45,6 +45,8 @@ class SharesDataLoader():
 
     def get_share_data(self, ticket: str, timeframe: int, utc_till: datetime, how_many_bars: int) -> DataFrame:
         rates = mt5.copy_rates_from(ticket, timeframe, utc_till, how_many_bars)
+        print(rates)
+        print(type(rates))
         # создадим из полученных данных DataFrame
         rates_frame: DataFrame = pd.DataFrame(rates)
         # сконвертируем время в виде секунд в формат datetime
