@@ -18,5 +18,5 @@
  - установить зависимости `pip freeze > requirements.txt`
  - создать БД PostgreSQL с именем `spice.db`
  - накатить миграции `py manage.py migrate`
- - запустить задачу в `core\tasks.py`
  - запустить `py manage.py runserver`
+ - запустить команду `py manage.py get_data`
