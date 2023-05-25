@@ -3,8 +3,10 @@ import plotly.express as px
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, TemplateView
 from rest_framework.viewsets import ModelViewSet
+import plotly.graph_objects as go
+from django.db import connection
 
 from core.forms import RegisterForm
 from core.models import User, EURUSD_H1
@@ -67,26 +69,49 @@ class UserViewSet(ModelViewSet):
 
     # fig.show()
 
-class EURUSD_H1View(LoginRequiredMixin, ListView):
-    model = EURUSD_H1.objects.all()
-    login_url = '/signin/'
-    template_name = "core/main.html"
+# class EURUSD_H1View(LoginRequiredMixin, ListView):
+#     model = EURUSD_H1.objects.all()
+#     login_url = '/signin/'
+#     template_name = "core/main.html"
+#
+#     def get(self):
+#         qs = EURUSD_H1.objects.all()
+#         print(qs)
+#         projects_data = [
+#             {
+#                 'time': x.time,
+#                 'open': x.open,
+#                 'high': x.high,
+#                 'low': x.low,
+#                 'close': x.close,
+#
+#             } for x in qs
+#         ]
+#         df = pd.DataFrame(projects_data)
+#
+#         fig = px.timeline(
+#             df,
+#         )
+#         import plotly.graph_objects as go
 
-    def get(self):
-        qs = EURUSD_H1.objects.all()
-        print(qs)
-        projects_data = [
-            {
-                'time': x.time,
-                'open': x.open,
-                'high': x.high,
-                'low': x.low,
-                'close': x.close,
+class Graph(TemplateView):
+    template_name = 'core/main.html'
 
-            } for x in qs
-        ]
-        df = pd.DataFrame(projects_data)
+    def get_context_data(self, **kwargs):
+        context = super(Graph, self).get_context_data(**kwargs)
 
-        fig = px.timeline(
-            df,
-        )
+        query = str(EURUSD_H1.objects.all().query)
+        data = pd.read_sql_query(query, connection, parse_dates=True)[-50:]
+
+        candles = go.Figure(data=[go.Candlestick(x=data['time'],
+                                             open=data['open'],
+                                             high=data['high'],
+                                             low=data['low'],
+                                             close=data['close'])])
+
+        candles.update_layout(xaxis_rangeslider_visible=False, width=1000, height=800, autosize=False,
+                              title=EURUSD_H1.__name__, xaxis={'title': 'time'}, yaxis={'title': 'high'})
+
+        context['graph'] = candles.to_html()
+
+        return context

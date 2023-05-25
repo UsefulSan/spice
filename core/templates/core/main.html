@@ -8,9 +8,14 @@
     <title>Spice</title>
 </head>
 <body>
-<div> class="container mt-3"
+<div>
     {% block content %}
-        time
+         {% if graph %}
+             <div>
+            {{ graph|safe }}
+             </div>
+        </table>
+        {% endif %}
     {% endblock content %}
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"

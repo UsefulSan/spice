@@ -5,7 +5,7 @@ import pandas as pd  # импортируем модуль pandas для выв�
 import psycopg2  # импортируем модуль для работы с БД postgresql
 import pytz  # импортируем модуль pytz для работы с таймзоной
 from pandas import DataFrame
-import asyncio
+
 
 class SharesDataLoader():
     """Класс для загрузки данных с MetaTrader5"""
@@ -15,7 +15,7 @@ class SharesDataLoader():
         self.conn = None
         self.cursor = None
         self.connection_to_db = False
-        self.how_many_bars_max = 10000
+        self.how_many_bars_max = 1000000
 
         self.timezone = pytz.timezone("Etc/UTC")  # установим таймзону в UTC
         self.local_timezone = pytz.timezone("Europe/Moscow")
@@ -81,7 +81,7 @@ class SharesDataLoader():
         # print(dataframe.dtypes)
         return dataframe
 
-    async def always_get_share_data(self, ticket: str, timeframe_name: str, timeframe: dict[int]) -> None:
+    def always_get_share_data(self, ticket: str, timeframe_name: str, timeframe: dict[int]) -> None:
         """
         Сначала обновляет исторические данные о валюте в БД, потом ожидает появления нового фрейма, забирает его и
         добаляет в БД
@@ -174,7 +174,6 @@ class SharesDataLoader():
             next_bar_time = last_bar_time + timedelta(seconds=timeframe[1])
             if next_bar_time > datetime.now(tz=self.local_timezone):
                 break
-
 
         # ----------------------- Update in Real Time -----------------------
         # while True:
