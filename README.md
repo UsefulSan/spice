@@ -15,7 +15,7 @@
 
  - клонировать репозиторий `git clone https://github.com/universetoday/spice.git`
  - добавить python интерпретатор 
- - установить зависимости `pip freeze > requirements.txt`
+ - установить зависимости `pip install -r requirements.txt`
  - создать БД PostgreSQL с именем `spice.db`
  - накатить миграции `py manage.py migrate`
  - запустить `py manage.py runserver`
